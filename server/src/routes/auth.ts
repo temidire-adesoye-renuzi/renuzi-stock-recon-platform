@@ -7,7 +7,12 @@ export const authRouter = Router()
 
 authRouter.post('/login', (req, res): void => {
   const { email, password } = req.body as { email?: unknown; password?: unknown }
-  if (typeof email !== 'string' || typeof password !== 'string' || email === '' || password === '') {
+  if (
+    typeof email !== 'string' ||
+    typeof password !== 'string' ||
+    email === '' ||
+    password === ''
+  ) {
     res.status(400).json({ error: 'EMAIL_AND_PASSWORD_REQUIRED' })
     return
   }

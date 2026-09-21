@@ -13,6 +13,7 @@
   "scripts": {
     "client": "npm run dev --workspace client",
     "server": "npm run dev --workspace server",
+    "recon:dry": "npm run recon:dry --workspace @renuzi/server",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "format": "npm run format --workspaces --if-present",

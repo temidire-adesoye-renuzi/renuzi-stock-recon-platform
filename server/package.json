@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "seed": "tsx src/scripts/seed.ts",
+    "recon:dry": "tsx src/scripts/reconDryRun.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "tsc",
@@ -20,7 +21,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

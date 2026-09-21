@@ -10,7 +10,7 @@ import { isSubmissionOpen, lagosDateString } from '../services/cutoff.js'
  */
 export function requireCutoffOpen(req: Request, res: Response, next: NextFunction): void {
   const explicit = [req.params?.date, req.body?.date, req.query?.date].find(
-    (value) => typeof value === 'string' && value.trim() !== '',
+    (value) => typeof value === 'string' && value.trim() !== ''
   )
   const target = typeof explicit === 'string' ? explicit : lagosDateString(new Date())
 

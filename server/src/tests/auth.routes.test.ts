@@ -104,7 +104,10 @@ describe('RBAC over HTTP', () => {
 
 describe('Daily cutoff lock over HTTP', () => {
   it('blocks any write request targeting a past date with 403 LOCKED_FOR_AUDIT', async () => {
-    const res = await request(app).post('/api/v1/submissions').query({ date: '2020-01-01' }).send({})
+    const res = await request(app)
+      .post('/api/v1/submissions')
+      .query({ date: '2020-01-01' })
+      .send({})
     expect(res.status).toBe(403)
     expect(res.body).toEqual({ error: 'LOCKED_FOR_AUDIT' })
   })

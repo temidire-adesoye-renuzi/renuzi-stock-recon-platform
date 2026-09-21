@@ -12,5 +12,5 @@ export default tseslint.config(
       ecmaVersion: 2022,
       globals: globals.node,
     },
-  },
+  }
 )

@@ -45,7 +45,7 @@ function loadExisting(): StoredUser[] {
 
 const existing = loadExisting()
 const kept = existing.filter(
-  (user) => !SEED_USERS.some((seed) => seed.email.toLowerCase() === user.email.toLowerCase()),
+  (user) => !SEED_USERS.some((seed) => seed.email.toLowerCase() === user.email.toLowerCase())
 )
 
 const seeded: StoredUser[] = SEED_USERS.map((seed) => ({
@@ -59,4 +59,6 @@ mkdirSync(dirname(DATA_FILE), { recursive: true })
 writeFileSync(DATA_FILE, `${JSON.stringify({ users }, null, 2)}\n`, 'utf-8')
 
 console.log(`Seeded ${seeded.length} users (${kept.length} existing kept) -> ${DATA_FILE}`)
-users.forEach((user) => console.log(`  ${user.email} [${user.role}${user.location ? ` @ ${user.location}` : ''}]`))
+users.forEach((user) =>
+  console.log(`  ${user.email} [${user.role}${user.location ? ` @ ${user.location}` : ''}]`)
+)
