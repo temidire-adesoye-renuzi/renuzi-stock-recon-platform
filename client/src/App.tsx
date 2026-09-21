@@ -1,13 +1,36 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import Dashboard from './pages/Dashboard'
+import Login from './pages/Login'
+import { getToken } from './lib/api'
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  if (!getToken()) {
+    return <Navigate to="/login" replace />
+  }
+  return children
+}
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface text-slate-100">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold">Renuzi Ventures</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Automated Stock Reconciliation &amp; Variance Platform
-        </p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={<Navigate to={getToken() ? '/dashboard' : '/login'} replace />}
+        />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

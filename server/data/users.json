@@ -1,0 +1,27 @@
+{
+  "users": [
+    {
+      "id": "usr_admin",
+      "email": "admin@renuzi",
+      "name": "Renuzi Admin",
+      "role": "admin",
+      "passwordHash": "$2b$10$paS3nQKZG/6AOFqdO4KpFez0eo1KQ/IT9RahFgRnHLNtG4OKDaWWS"
+    },
+    {
+      "id": "usr_ketu",
+      "email": "ketu@renuzi",
+      "name": "Ketu Manager",
+      "role": "warehouse_manager",
+      "location": "Ketu",
+      "passwordHash": "$2b$10$VkTiF2I7WN/dr/ZzQiHJ1e67BTB0Y.tCCXrcO50dijvXjpyZwIHQC"
+    },
+    {
+      "id": "usr_lekki",
+      "email": "lekki@renuzi",
+      "name": "Lekki Manager",
+      "role": "warehouse_manager",
+      "location": "Lekki",
+      "passwordHash": "$2b$10$.TeN6hE1HsReX9KaLh/MT.DcaCQm6WJ7CXrEP2eKTgtB2vsvFv.Te"
+    }
+  ]
+}
