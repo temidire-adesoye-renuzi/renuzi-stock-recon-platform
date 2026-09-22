@@ -66,7 +66,10 @@ export function DockedTrendChart({ points }: { points: TrendPoint[] }) {
             />
             <Bar dataKey="value" radius={[2, 2, 0, 0]} maxBarSize={18}>
               {data.map((point) => (
-                <Cell key={point.day} fill={point.value === peak.value ? '#FB4B4C' : '#9798C9'} />
+                <Cell
+                  key={point.day}
+                  fill={point.value === peak.value ? '#FB4B4C' : '#9798C9'}
+                />
               ))}
             </Bar>
           </BarChart>

@@ -110,13 +110,18 @@ export const liveApi: RenuziApi = {
 
   listMappings: () =>
     guarded(async () => {
-      const { data } = await http.get<{ mappings: SkuMappingEntry[] }>('/admin/sku-mapping')
+      const { data } = await http.get<{ mappings: SkuMappingEntry[] }>(
+        '/admin/sku-mapping',
+      )
       return data.mappings
     }),
 
   createMapping: (entry) =>
     guarded(async () => {
-      const { data } = await http.post<{ mapping: SkuMappingEntry }>('/admin/sku-mapping', entry)
+      const { data } = await http.post<{ mapping: SkuMappingEntry }>(
+        '/admin/sku-mapping',
+        entry,
+      )
       return data.mapping
     }),
 
@@ -124,7 +129,8 @@ export const liveApi: RenuziApi = {
     guarded(async () => {
       const { data } = await http.put<{ mapping: SkuMappingEntry }>(
         `/admin/sku-mapping/${encodeURIComponent(code)}`,
-        patch
+        patch,
+      )
       )
       return data.mapping
     }),
@@ -132,7 +138,8 @@ export const liveApi: RenuziApi = {
   deleteMapping: (code) =>
     guarded(async () => {
       const { data } = await http.delete<{ mapping: SkuMappingEntry }>(
-        `/admin/sku-mapping/${encodeURIComponent(code)}`
+        `/admin/sku-mapping/${encodeURIComponent(code)}`,
+      )
       )
       return data.mapping
     }),
@@ -141,7 +148,10 @@ export const liveApi: RenuziApi = {
     guarded(async () => {
       const form = new FormData()
       form.append('file', file)
-      const { data } = await http.post<SkuMappingImportResult>('/admin/sku-mapping/import', form)
+      const { data } = await http.post<SkuMappingImportResult>(
+        '/admin/sku-mapping/import',
+        form,
+      )
       return data
     }),
 

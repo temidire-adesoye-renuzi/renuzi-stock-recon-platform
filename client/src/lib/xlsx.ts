@@ -158,7 +158,11 @@ const MAX_ROW_ISSUES = 5
  * the detected header row; required-but-absent columns surface as one issue per
  * column with the human display name.
  */
-function validateHeader(fileLabel: string, fields: FieldSpec[], found: string[]): string[] {
+function validateHeader(
+  fileLabel: string,
+  fields: FieldSpec[],
+  found: string[],
+): string[] {
   const shape: Record<string, z.ZodTypeAny> = {}
   for (const field of fields) {
     for (const name of field.names) shape[normalizeHeaderName(name)] = z.string()
@@ -171,17 +175,23 @@ function validateHeader(fileLabel: string, fields: FieldSpec[], found: string[])
   for (const issue of result.error.issues) {
     const key = String(issue.path[0] ?? '')
     const field = fields.find((candidate) =>
-      candidate.names.some((name) => normalizeHeaderName(name) === key)
+      candidate.names.some((name) => normalizeHeaderName(name) === key),
     )
     if (field) missing.add(field.label)
   }
-  return [...missing].map((label) => `${fileLabel}: missing required column "${label}".`)
+  return [...missing].map(
+    (label) => `${fileLabel}: missing required column "${label}".`,
+  )
 }
 
 function validateRows<T>(
   fileLabel: string,
   schema: z.ZodType<T>,
-  rows: T[]
+function validateRows<T>(
+  fileLabel: string,
+  schema: z.ZodType<T>,
+  rows: T[],
+): { ok: boolean; issues: string[] } {
 ): { ok: boolean; issues: string[] } {
   const issues: string[] = []
   for (let i = 0; i < rows.length; i += 1) {
@@ -294,7 +304,8 @@ export function dateFromSheetName(sheetName: string): string | null {
 }
 
 export async function parseXeroFile(
-  file: File
+  file: File,
+): Promise<ParsedFile<XeroItemRow> & { sheetNames: string[] }> {
 ): Promise<ParsedFile<XeroItemRow> & { sheetNames: string[] }> {
   const sheets = await readWorkbookRows(file)
   if (sheets.size === 0) {

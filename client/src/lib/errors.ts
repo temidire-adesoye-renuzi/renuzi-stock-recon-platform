@@ -23,7 +23,9 @@ const MESSAGES: Record<string, string> = {
 export function errorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     const base = MESSAGES[error.code] ?? error.code.replace(/_/g, ' ').toLowerCase()
-    return error.code === 'UNPARSABLE_FILE' && error.message ? `${base} ${error.message}` : base
+    return error.code === 'UNPARSABLE_FILE' && error.message
+      ? `${base} ${error.message}`
+      : base
   }
   if (error instanceof Error && error.message !== '') return error.message
   return MESSAGES.UNKNOWN_ERROR

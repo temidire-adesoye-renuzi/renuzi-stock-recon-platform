@@ -73,7 +73,9 @@ export function VarianceTable({ records, flagged, onToggleFlag }: VarianceTableP
               const docked = record.Docked_Qty ?? 0
               const undocked = record.Undocked_Qty ?? 0
               const dockedValue =
-                docked > 0 && record.Unit_Price_NGN !== null ? docked * record.Unit_Price_NGN : 0
+                docked > 0 && record.Unit_Price_NGN !== null
+                  ? docked * record.Unit_Price_NGN
+                  : 0
               const pill: RowStatus =
                 record.Status === 'Unmapped'
                   ? 'Unmapped'

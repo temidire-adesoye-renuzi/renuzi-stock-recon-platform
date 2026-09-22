@@ -43,7 +43,7 @@ export interface FuzzySuggestion {
 /** Best mapping suggestion (code + name + Dice score) for an unmapped item name. */
 export function bestMatch(
   sourceName: string,
-  candidates: Array<{ code: string; name: string }>
+  candidates: Array<{ code: string; name: string }>,
 ): FuzzySuggestion | null {
   const normalized = normalizeItemName(sourceName)
   if (normalized === '') return null

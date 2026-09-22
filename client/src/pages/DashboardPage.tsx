@@ -8,7 +8,12 @@ import { ErrorView, LoadingView } from '../components/ui/StateViews'
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { VarianceTable } from '../components/dashboard/VarianceTable'
 import { DockedTrendChart } from '../components/dashboard/DockedTrendChart'
-import type { AuditEntry, ReconciliationRow, SkuMappingEntry, StatusResult } from '../lib/apiTypes'
+import type {
+  AuditEntry,
+  ReconciliationRow,
+  SkuMappingEntry,
+  StatusResult,
+} from '../lib/apiTypes'
 import { errorMessage } from '../lib/errors'
 import { formatNaira, formatNumber } from '../lib/format'
 import { listFlags, toggleFlag } from '../lib/flags'
@@ -22,7 +27,7 @@ const RANGE_OPTIONS = [
 
 function pctDelta(
   current: number,
-  previous: number
+  previous: number,
 ): { text: string; direction: 'up' | 'down' | 'flat' } {
   if (previous === 0 && current === 0) return { text: '', direction: 'flat' }
   if (previous === 0) return { text: 'new', direction: 'up' }
@@ -74,8 +79,9 @@ export default function DashboardPage() {
         const safeLocs = locs.length > 0 ? locs : ['Ketu', 'Lekki']
         const results = await Promise.all(
           safeLocs.flatMap((loc) =>
-            dates.map((date) => api.getReconciliationStatus(date, loc).catch(() => null))
-          )
+            dates.map((date) => api.getReconciliationStatus(date, loc).catch(() => null)),
+          ),
+        )
         )
         setLocations(safeLocs)
         setStatuses(results.filter((item): item is StatusResult => item !== null))
@@ -120,7 +126,8 @@ export default function DashboardPage() {
         if (category !== 'all' && categoryBySku.get(row.SKU_Code) !== category) return false
         return true
       }),
-    [allRows, scopedDates, location, category, categoryBySku]
+    [allRows, scopedDates, location, category, categoryBySku],
+  )
   )
 
   const previousRows = useMemo(() => {
@@ -140,18 +147,20 @@ export default function DashboardPage() {
     const dockedValue = sum(filtered, (row) =>
       row.Docked_Qty !== null && row.Unit_Price_NGN !== null && row.Docked_Qty > 0
         ? row.Docked_Qty * row.Unit_Price_NGN
-        : 0
+        : 0,
+    )
     )
     const prevDockedValue = sum(previousRows, (row) =>
       row.Docked_Qty !== null && row.Unit_Price_NGN !== null && row.Docked_Qty > 0
         ? row.Docked_Qty * row.Unit_Price_NGN
-        : 0
+        : 0,
     )
     const undocked = sum(filtered, (row) =>
-      row.Undocked_Qty !== null && row.Undocked_Qty > 0 ? row.Undocked_Qty : 0
+      row.Undocked_Qty !== null && row.Undocked_Qty > 0 ? row.Undocked_Qty : 0,
     )
     const prevUndocked = sum(previousRows, (row) =>
-      row.Undocked_Qty !== null && row.Undocked_Qty > 0 ? row.Undocked_Qty : 0
+      row.Undocked_Qty !== null && row.Undocked_Qty > 0 ? row.Undocked_Qty : 0,
+    )
     )
     const discrepancies = filtered.filter((row) => row.Status !== 'Matched').length
     const prevDiscrepancies = previousRows.filter((row) => row.Status !== 'Matched').length
@@ -197,7 +206,8 @@ export default function DashboardPage() {
             (row.Docked_Qty !== null && row.Unit_Price_NGN !== null && row.Docked_Qty > 0
               ? row.Docked_Qty * row.Unit_Price_NGN
               : 0),
-          0
+          0,
+        )
         ),
     }))
   }, [dates, filtered])
@@ -465,7 +475,13 @@ export default function DashboardPage() {
   )
 }
 
-function Header({ onExport, onAudit }: { onExport: () => void; onAudit: () => void }) {
+function Header({
+  onExport,
+  onAudit,
+}: {
+  onExport: () => void
+  onAudit: () => void
+}) {
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white px-6 py-3">
       <div className="flex items-center gap-4">

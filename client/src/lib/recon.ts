@@ -4,7 +4,12 @@
  * services/skuMatching.ts. Used by the /submit preview table and by mockApi's
  * submit pipeline; the live backend is the authoritative engine on submit.
  */
-import type { ManualCountRow, ReconSummary, ReconciliationRow, SkuMappingEntry } from './apiTypes'
+import type {
+  ManualCountRow,
+  ReconSummary,
+  ReconciliationRow,
+  SkuMappingEntry,
+} from './apiTypes'
 import { FUZZY_THRESHOLD, diceCoefficient, normalizeItemName } from './fuzzy'
 import type { LeverEdgeItemRow, PhysicalItemRow, XeroItemRow } from './xlsx'
 
@@ -83,7 +88,7 @@ class Matcher {
     sku: string,
     name: string,
     nameIndex: Map<string, string>,
-    groupSources: GroupSources
+    groupSources: GroupSources,
   ): {
     method: Method
     key: string | null
@@ -232,7 +237,13 @@ export function reconcile(input: ReconcileInput): ReconciliationRow[] {
   rows.sort(
     (a, b) =>
       (a.Item_Name < b.Item_Name ? -1 : a.Item_Name > b.Item_Name ? 1 : 0) ||
-      (a.SKU_Code < b.SKU_Code ? -1 : a.SKU_Code > b.SKU_Code ? 1 : 0)
+  rows.sort(
+    (a, b) =>
+      (a.Item_Name < b.Item_Name ? -1 : a.Item_Name > b.Item_Name ? 1 : 0) ||
+      (a.SKU_Code < b.SKU_Code ? -1 : a.SKU_Code > b.SKU_Code ? 1 : 0),
+  )
+  return rows
+}
   )
   return rows
 }
@@ -248,7 +259,8 @@ function buildRow(group: Group, input: ReconcileInput): ReconciliationRow {
     ? round3(
         (group.physical.cs ?? 0) * csFactor +
           (group.physical.dz ?? 0) * dzFactor +
-          group.physical.pc
+          group.physical.pc,
+        )
       )
     : null
 
@@ -333,7 +345,8 @@ function buildRow(group: Group, input: ReconcileInput): ReconciliationRow {
 export function mergeManualCounts(
   physical: PhysicalItemRow[],
   manual: ManualCountRow[],
-  location: string
+  location: string,
+): { merged: PhysicalItemRow[]; notesBySku: Map<string, string> } {
 ): { merged: PhysicalItemRow[]; notesBySku: Map<string, string> } {
   const notesBySku = new Map<string, string>()
   const merged = physical.map((row) => ({ ...row }))
@@ -386,7 +399,7 @@ export function summarizeRows(rows: ReconciliationRow[]): ReconSummary {
       summary.dockedQty = round3(summary.dockedQty + row.Docked_Qty)
       if (row.Unit_Price_NGN !== null) {
         summary.dockedValueNGN = round3(
-          summary.dockedValueNGN + row.Docked_Qty * row.Unit_Price_NGN
+          summary.dockedValueNGN + row.Docked_Qty * row.Unit_Price_NGN,
         )
       }
     }
@@ -394,7 +407,8 @@ export function summarizeRows(rows: ReconciliationRow[]): ReconSummary {
       summary.undockedQty = round3(summary.undockedQty + row.Undocked_Qty)
       if (row.Unit_Price_NGN !== null) {
         summary.undockedValueNGN = round3(
-          summary.undockedValueNGN + row.Undocked_Qty * row.Unit_Price_NGN
+          summary.undockedValueNGN + row.Undocked_Qty * row.Unit_Price_NGN,
+        )
         )
       }
     }
@@ -440,7 +454,8 @@ export interface ComputedPreviewRow extends PreviewRow {
  */
 export function buildPreviewRows(
   sources: { leveredge: LeverEdgeItemRow[]; xero: XeroItemRow[]; physical: PhysicalItemRow[] },
-  mapping: SkuMappingEntry[]
+  mapping: SkuMappingEntry[],
+): PreviewRow[] {
 ): PreviewRow[] {
   const rows = reconcile({
     date: 'preview',
@@ -476,9 +491,12 @@ export function buildPreviewRows(
 export function computePreviewRow(row: PreviewRow): ComputedPreviewRow {
   const physicalUnits = round3(row.cs * row.csFactor + row.dz * row.dzFactor + row.pc)
   const docked = row.leverEdgeQty !== null ? round3(row.leverEdgeQty - physicalUnits) : 0
-  const undocked = row.xeroQty !== null ? round3(physicalUnits - row.xeroQty) : 0
+  const undocked =
+    row.xeroQty !== null ? round3(physicalUnits - row.xeroQty) : 0
   const totalVariance =
-    row.leverEdgeQty !== null && row.xeroQty !== null ? round3(row.leverEdgeQty - row.xeroQty) : 0
+    row.leverEdgeQty !== null && row.xeroQty !== null
+      ? round3(row.leverEdgeQty - row.xeroQty)
+      : 0
 
   let status: ComputedPreviewRow['status'] = 'Unmapped'
   if (!row.unmapped) {

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CalendarDaysIcon, CheckCircle2Icon, MapPinIcon, RefreshCwIcon } from 'lucide-react'
+import {
+  CalendarDaysIcon,
+  CheckCircle2Icon,
+  MapPinIcon,
+  RefreshCwIcon,
+} from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { useToast } from '../components/Toast'
 import { Button } from '../components/ui/Button'
@@ -139,11 +144,12 @@ export default function SubmitPage() {
         return
       }
       const xeroForLocation = parsed.xero.filter(
-        (row) => row.location.toLowerCase() === loc.toLowerCase()
+        (row) => row.location.toLowerCase() === loc.toLowerCase(),
       )
       const fresh = buildPreviewRows(
         { leveredge: parsed.leveredge, xero: xeroForLocation, physical: parsed.physical },
-        map
+        map,
+      )
       )
       // Restore any locally saved draft counts/notes for this date+location.
       try {
@@ -165,10 +171,13 @@ export default function SubmitPage() {
       }
       setRows(fresh)
     },
-    [today]
+    [today],
   )
 
-  async function handleFile(field: 'leveredge' | 'xero' | 'physical', file: File): Promise<void> {
+  async function handleFile(
+    field: 'leveredge' | 'xero' | 'physical',
+    file: File,
+  ): Promise<void> {
     setBusyField(field)
     try {
       if (field === 'leveredge') {
@@ -205,7 +214,7 @@ export default function SubmitPage() {
       else setPhysicalIssues(issues)
       toast(
         `${field === 'leveredge' ? 'LeverEdge' : field === 'xero' ? 'Xero' : 'Physical count'} file rejected — check the columns listed.`,
-        'error'
+        'error',
       )
     } finally {
       setBusyField(null)
@@ -253,7 +262,9 @@ export default function SubmitPage() {
   // ----- editing ------------------------------------------------------------
 
   function handleCountChange(sku: string, field: 'cs' | 'dz' | 'pc', value: number) {
-    setRows((current) => current.map((row) => (row.sku === sku ? { ...row, [field]: value } : row)))
+    setRows((current) =>
+      current.map((row) => (row.sku === sku ? { ...row, [field]: value } : row)),
+    )
   }
 
   function saveNote(sku: string, note: string) {
@@ -342,7 +353,8 @@ export default function SubmitPage() {
   }, [locked, status])
 
   const filesReady = Boolean(leveredge && xero && rows.length > 0)
-  const submittedAt = status?.rows.find((row) => row.Submitted_At !== null)?.Submitted_At ?? null
+  const submittedAt =
+    status?.rows.find((row) => row.Submitted_At !== null)?.Submitted_At ?? null
 
   if (!user) return null
 
@@ -549,8 +561,8 @@ export default function SubmitPage() {
               />
             ) : locked ? (
               <div className="rounded-lg border border-danger-25 bg-danger-10 px-4 py-8 text-center text-xs text-[#C22F30]">
-                No submission is on record for today and the 6:00 PM WAT cutoff has passed — the day
-                is locked for executive audit.
+                No submission is on record for today and the 6:00 PM WAT cutoff has passed — the
+                day is locked for executive audit.
               </div>
             ) : (
               <SubmissionTable

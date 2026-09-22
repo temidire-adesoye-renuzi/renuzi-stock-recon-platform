@@ -21,7 +21,11 @@ import {
 } from './apiTypes'
 import { generateSeedData, LOCATIONS, MOCK_USERS, seedMappings, type MockUser } from './fixtures'
 import { bestMatch } from './fuzzy'
-import { mergeManualCounts, reconcile, summarizeRows } from './recon'
+import {
+  mergeManualCounts,
+  reconcile,
+  summarizeRows,
+} from './recon'
 import { isSubmissionOpen } from './wat'
 import {
   parseLeverEdgeFile,
@@ -122,7 +126,7 @@ function logAudit(
   action: string,
   details: string,
   date: string | null = null,
-  location: string | null = null
+  location: string | null = null,
 ): void {
   auditLog.push({
     Timestamp: new Date().toISOString(),
@@ -264,7 +268,7 @@ export const mockApi: RenuziApi = {
       throw new ApiError(
         'LOCKED_FOR_AUDIT',
         403,
-        'Submissions lock at 6:00 PM WAT for executive audit.'
+        'Submissions lock at 6:00 PM WAT for executive audit.',
       )
     }
 
@@ -304,10 +308,12 @@ export const mockApi: RenuziApi = {
     const summary = summarizeRows(rows)
 
     const removed = reconRows.filter(
-      (row) => row.Date === date && row.Location.toLowerCase() === location.toLowerCase()
+    const removed = reconRows.filter(
+      (row) => row.Date === date && row.Location.toLowerCase() === location.toLowerCase(),
     ).length
     reconRows = reconRows.filter(
-      (row) => !(row.Date === date && row.Location.toLowerCase() === location.toLowerCase())
+      (row) => !(row.Date === date && row.Location.toLowerCase() === location.toLowerCase()),
+    )
     )
     reconRows.push(...rows)
     persistRecon()
@@ -323,7 +329,8 @@ export const mockApi: RenuziApi = {
         unmapped: summary.unmapped,
       }),
       date,
-      location
+      location,
+    )
     )
 
     return {
@@ -354,7 +361,9 @@ export const mockApi: RenuziApi = {
       }
     }
     const scoped = reconRows.filter(
-      (row) => row.Date === date && row.Location.toLowerCase() === location.toLowerCase()
+    const scoped = reconRows.filter(
+      (row) => row.Date === date && row.Location.toLowerCase() === location.toLowerCase(),
+    )
     )
     return {
       date,
@@ -398,7 +407,12 @@ export const mockApi: RenuziApi = {
     if (index < 0) throw new ApiError('SKU_MAPPING_NOT_FOUND', 404)
     const merged = coerceMapping({ ...mappings[index], ...patch })
     if (
-      mappings.some((entry, i) => i !== index && entry.leverEdgeSkuCode === merged.leverEdgeSkuCode)
+      mappings.some(
+        (entry, i) => i !== index && entry.leverEdgeSkuCode === merged.leverEdgeSkuCode,
+      )
+    ) {
+      throw new ApiError('SKU_MAPPING_EXISTS', 409)
+    }
     ) {
       throw new ApiError('SKU_MAPPING_EXISTS', 409)
     }
@@ -440,7 +454,7 @@ export const mockApi: RenuziApi = {
       throw new ApiError(
         'IMPORT_FAILED',
         400,
-        'CSV import: missing LeverEdge_SKU_Code header column'
+        'CSV import: missing LeverEdge_SKU_Code header column',
       )
     }
 
@@ -469,14 +483,17 @@ export const mockApi: RenuziApi = {
       byCode.set(code, entry)
     })
     mappings = [...byCode.values()].sort((a, b) =>
-      a.leverEdgeSkuCode.localeCompare(b.leverEdgeSkuCode)
+    mappings = [...byCode.values()].sort((a, b) =>
+      a.leverEdgeSkuCode.localeCompare(b.leverEdgeSkuCode),
+    )
     )
     result.total = mappings.length
     persistMappings()
     logAudit(
       user,
       'IMPORT_SKU_MAPPING',
-      `CSV import: ${result.created} created, ${result.updated} updated (${result.total} total)`
+      `CSV import: ${result.created} created, ${result.updated} updated (${result.total} total)`,
+    )
     )
     return result
   },

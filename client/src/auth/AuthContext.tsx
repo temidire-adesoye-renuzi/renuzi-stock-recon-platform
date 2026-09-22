@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginAs = useCallback(
     async (email: string): Promise<AuthUser> => login(email, 'demo'),
-    [login]
+    [login],
   )
 
   const logout = useCallback(() => {
@@ -46,11 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const can = useCallback((allowed: Role[]) => (user ? allowed.includes(user.role) : false), [user])
+  const can = useCallback(
+    (allowed: Role[]) => (user ? allowed.includes(user.role) : false),
+    [user],
+  )
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, mockMode, api, login, loginAs, logout, can }),
-    [user, mockMode, api, login, loginAs, logout, can]
+    [user, mockMode, api, login, loginAs, logout, can],
+  )
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,5 +1,11 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { ClipboardCheckIcon, GaugeIcon, LayersIcon, LogOutIcon, SettingsIcon } from 'lucide-react'
+import {
+  ClipboardCheckIcon,
+  GaugeIcon,
+  LayersIcon,
+  LogOutIcon,
+  SettingsIcon,
+} from 'lucide-react'
 import type { Role } from '../lib/apiTypes'
 import { useAuth } from '../auth/AuthContext'
 import { lagosClockLabel } from '../lib/wat'
@@ -95,9 +101,7 @@ export function AppShell() {
               {user ? initials(user.name) : '—'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-white">
-                {user?.name ?? 'Signed out'}
-              </p>
+              <p className="truncate text-xs font-medium text-white">{user?.name ?? 'Signed out'}</p>
               <p className="truncate text-2xs text-white/50">
                 {user?.role === 'warehouse_manager'
                   ? `${user.location} Warehouse`

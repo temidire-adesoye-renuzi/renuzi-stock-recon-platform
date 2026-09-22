@@ -64,7 +64,9 @@ export function RoleSwitcher() {
                     disabled={busy !== null}
                     onClick={() => switchTo(account.email, account.label)}
                     className={`w-full rounded-md px-2.5 py-2 text-left transition-colors duration-150 ease-out disabled:opacity-50 ${
-                      active ? 'bg-brand-10' : 'hover:bg-neutral-100'
+                      active
+                        ? 'bg-brand-10'
+                        : 'hover:bg-neutral-100'
                     }`}
                   >
                     <p className="text-xs font-semibold text-ink">

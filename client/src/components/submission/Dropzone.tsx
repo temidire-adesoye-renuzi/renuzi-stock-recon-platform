@@ -56,7 +56,10 @@ export function Dropzone({
     return (
       <section className="rounded-lg border border-danger-25 bg-danger-10 p-3">
         <div className="flex items-start gap-2.5">
-          <AlertTriangleIcon className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
+          <AlertTriangleIcon
+            className="mt-0.5 h-4 w-4 shrink-0 text-danger"
+            aria-hidden="true"
+          />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold text-ink">{title}</p>
             <ul className="mt-1 space-y-0.5">

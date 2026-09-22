@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CheckIcon,
-  PencilIcon,
+    PencilIcon,
+  PlusIcon,
+  SearchIcon,
+  Trash2Icon,
   PlusIcon,
   SearchIcon,
   Trash2Icon,
@@ -18,7 +21,12 @@ import { ApiError } from '../lib/apiTypes'
 import { errorMessage } from '../lib/errors'
 
 type EditableField =
-  'leverEdgeItemName' | 'xeroItemCode' | 'xeroItemName' | 'csFactor' | 'dzFactor' | 'category'
+  | 'leverEdgeItemName'
+  | 'xeroItemCode'
+  | 'xeroItemName'
+  | 'csFactor'
+  | 'dzFactor'
+  | 'category'
 
 const headCell =
   'sticky top-0 z-10 bg-brand-10 px-3 py-2 text-2xs font-semibold uppercase tracking-wide text-brand'
@@ -82,7 +90,8 @@ export default function AdminPage() {
       ]
         .join(' ')
         .toLowerCase()
-        .includes(term)
+        .includes(term),
+    )
     )
   }, [mappings, query])
 
@@ -103,7 +112,7 @@ export default function AdminPage() {
       if (!Number.isFinite(parsed) || parsed <= 0) {
         toast(
           `${editing.field === 'csFactor' ? 'CS' : 'DZ'} factor must be a positive number`,
-          'error'
+          'error',
         )
         setEditing(null)
         return
@@ -117,8 +126,9 @@ export default function AdminPage() {
       const updated = await api.updateMapping(editing.code, patch)
       setMappings((current) =>
         (current ?? []).map((row) =>
-          row.leverEdgeSkuCode === updated.leverEdgeSkuCode ? updated : row
-        )
+          row.leverEdgeSkuCode === updated.leverEdgeSkuCode ? updated : row,
+        ),
+      )
       )
       toast(`Mapping ${editing.code} updated`, 'success')
     } catch (error) {
@@ -137,8 +147,9 @@ export default function AdminPage() {
       })
       setMappings((current) =>
         (current ?? []).map((row) =>
-          row.leverEdgeSkuCode === updated.leverEdgeSkuCode ? updated : row
-        )
+          row.leverEdgeSkuCode === updated.leverEdgeSkuCode ? updated : row,
+        ),
+      )
       )
     } catch (error) {
       toast(errorMessage(error), 'error')
@@ -157,7 +168,8 @@ export default function AdminPage() {
     try {
       await api.deleteMapping(entry.leverEdgeSkuCode)
       setMappings((current) =>
-        (current ?? []).filter((row) => row.leverEdgeSkuCode !== entry.leverEdgeSkuCode)
+        (current ?? []).filter((row) => row.leverEdgeSkuCode !== entry.leverEdgeSkuCode),
+      )
       )
       toast(`Mapping ${entry.leverEdgeSkuCode} deleted`, 'success')
     } catch (error) {
@@ -234,7 +246,11 @@ export default function AdminPage() {
       setCreateError(
         error instanceof ApiError && error.code === 'SKU_MAPPING_EXISTS'
           ? 'A mapping with that LeverEdge code already exists.'
-          : errorMessage(error)
+      setCreateError(
+        error instanceof ApiError && error.code === 'SKU_MAPPING_EXISTS'
+          ? 'A mapping with that LeverEdge code already exists.'
+          : errorMessage(error),
+      )
       )
     }
   }
@@ -246,7 +262,11 @@ export default function AdminPage() {
       toast(
         `CSV import: ${result.created} created, ${result.updated} updated (${result.total} total)` +
           (result.errors.length > 0 ? ` · ${result.errors.length} rows skipped` : ''),
-        result.errors.length > 0 ? 'info' : 'success'
+      toast(
+        `CSV import: ${result.created} created, ${result.updated} updated (${result.total} total)` +
+          (result.errors.length > 0 ? ` · ${result.errors.length} rows skipped` : ''),
+        result.errors.length > 0 ? 'info' : 'success',
+      )
       )
       const list = await api.listMappings()
       setMappings(list)
@@ -265,7 +285,7 @@ export default function AdminPage() {
     entry: SkuMappingEntry,
     field: EditableField,
     value: string,
-    numeric = false
+    numeric = false,
   ) {
     const isEditing = editing?.code === entry.leverEdgeSkuCode && editing.field === field
     if (isEditing) {

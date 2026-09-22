@@ -1138,7 +1138,7 @@ const SEED_SKUS: SeedSku[] = [
     category: 'Seasonings',
     price: 26110,
     active: false,
-  },
+  }
 ]
 
 export function seedMappings(): SkuMappingEntry[] {
@@ -1229,7 +1229,7 @@ export function generateSeedData(now: Date = new Date()): SeedData {
       const submittedAt = isoAt(
         date,
         isToday ? 11 + locationIndex : 17,
-        isToday ? 12 + locationIndex * 21 : 5
+        isToday ? 12 + locationIndex * 21 : 5,
       )
       const count = 26 + Math.floor(rng() * 4)
       const picked = [...active].sort(() => rng() - 0.5).slice(0, count)
@@ -1360,7 +1360,7 @@ export function generateSeedData(now: Date = new Date()): SeedData {
       Date: null,
       Location: null,
       Details: 'CSV import: 28 created, 0 updated (28 total)',
-    }
+    },
   )
 
   return { reconRows: rows, audit, unmapped: seedUnmapped(seedMappings()) }

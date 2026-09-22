@@ -5,12 +5,6 @@
  */
 
 export const TIMEZONE = 'Africa/Lagos'
-
-/**
- * WAT hour (0-23) at which submissions lock for the rest of the day. Mirrors
- * the server's CUTOFF_HOUR env: fixed 18:00 live-side; in mock mode an optional
- * VITE_CUTOFF_HOUR can shift it for after-hours demos (default stays 18:00).
- */
 export const CUTOFF_HOUR =
   import.meta.env.VITE_API_MODE === 'live'
     ? 18
