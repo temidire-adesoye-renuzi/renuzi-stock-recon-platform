@@ -126,19 +126,22 @@ export class MockStorage implements IStorage {
     })
   }
 
-  /** Rebuild a sheet: single table covering header + all data rows. */
+  /**
+   * Rebuild a sheet: replace the worksheet entirely, then add one table
+   * covering the header + all data rows.
+   *
+   * Replacement (not splice) is deliberate: ExcelJS spliceRows is a no-op
+   * when clearing a worksheet's full row range, and table-materialised cells
+   * otherwise survive saves as stale tail rows. Removing and re-adding the
+   * worksheet is deterministic; the tab position (orderNo) is preserved.
+   */
   private rebuildSheet(wb: ExcelJS.Workbook, spec: WorkbookSheetSpec, rows: WorkbookCellValue[][]): void {
-    let ws = wb.getWorksheet(spec.sheet)
-    if (!ws) {
-      ws = wb.addWorksheet(spec.sheet)
-    }
-    if (ws.getTables().some((entry) => entry[0]?.name === spec.table)) {
-      ws.removeTable(spec.table)
-    }
-    const currentRowCount = ws.rowCount
-    if (currentRowCount > 0) {
-      ws.spliceRows(1, currentRowCount)
-    }
+    const previous = wb.getWorksheet(spec.sheet)
+    // orderNo exists at runtime but is missing from ExcelJS's typings.
+    const orderNo = (previous as unknown as { orderNo?: number } | undefined)?.orderNo
+    if (previous) wb.removeWorksheet(spec.sheet)
+    const ws = wb.addWorksheet(spec.sheet)
+    if (typeof orderNo === 'number') (ws as unknown as { orderNo: number }).orderNo = orderNo
     ws.addTable({
       name: spec.table,
       ref: 'A1',
@@ -159,7 +162,7 @@ export class MockStorage implements IStorage {
     let changed = !existsSync(this.filePath)
     for (const spec of WORKBOOK_SHEETS) {
       const ws = wb.getWorksheet(spec.sheet)
-      const tableMissing = !ws || !ws.getTables().some((entry) => entry[0]?.name === spec.table)
+      const tableMissing = !ws || !tableNames(ws).includes(spec.table)
       if (tableMissing) {
         // Preserve any existing data (e.g. sheet created outside a table).
         const existingRows = ws ? this.readCells(ws, spec) : []

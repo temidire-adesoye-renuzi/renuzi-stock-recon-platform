@@ -3,9 +3,17 @@
  * enqueued here, so writes hit the workbook strictly sequentially — Excel
  * (file or Graph session) must never see interleaved writes.
  *
+ * runExclusive() runs a multi-step transaction as ONE queue slot. Work that
+ * the transaction itself submits (delete + append + audit) is re-entrant: it
+ * executes inline instead of queueing behind its own transaction, which would
+ * deadlock. Re-entrancy is scoped with AsyncLocalStorage so writes from OTHER
+ * requests still queue normally behind the whole transaction.
+ *
  * withRetry adds exponential backoff for transient throttling (HTTP 429/503),
  * honouring a Retry-After hint when the error carries one.
  */
+
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 export const RETRYABLE_STATUSES = new Set([429, 503])
 
@@ -72,7 +80,6 @@ export async function withRetry<T>(
   const sleep = options.sleep ?? defaultSleep
 
   let attempt = 0
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     attempt += 1
     try {
@@ -89,9 +96,16 @@ export async function withRetry<T>(
 
 export class WriteQueue {
   private tail: Promise<unknown> = Promise.resolve()
+  /** True only within the async context of a running runExclusive(). */
+  private readonly inTransaction = new AsyncLocalStorage<boolean>()
 
   /** Queue an operation; it runs strictly after everything before it. */
   enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.inTransaction.getStore() === true) {
+      // Re-entrant call from inside the running transaction: execute inline.
+      // Queueing here would wait for the transaction, which waits on us.
+      return operation()
+    }
     const result = this.tail.then(operation, operation)
     this.tail = result.then(
       () => undefined,
@@ -102,6 +116,6 @@ export class WriteQueue {
 
   /** Run an operation that may itself enqueue nested work (a transaction). */
   runExclusive<T>(operation: () => Promise<T>): Promise<T> {
-    return this.enqueue(operation)
+    return this.enqueue(() => this.inTransaction.run(true, operation))
   }
 }

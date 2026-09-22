@@ -63,8 +63,11 @@ export async function updateMapping(
   input: unknown,
   actor?: AuthUser
 ): Promise<SkuMappingOpResult> {
-  const coerced = coerceSkuMappingInput(input)
-  if (!coerced.ok) return { ok: false, error: 'INVALID_SKU_MAPPING' }
+  // Partial payloads are allowed: merge over the existing entry FIRST, then
+  // coerce the merged object (mirrors the Phase 2 CSV update semantics).
+  if (typeof input !== 'object' || input === null) {
+    return { ok: false, error: 'INVALID_SKU_MAPPING' }
+  }
   await storageReady()
   const storage = getStorage()
   const updated = await storageTransaction(async () => {
@@ -73,7 +76,7 @@ export async function updateMapping(
     if (index < 0) return { missing: true as const }
     const merged = coerceSkuMappingInput({
       ...tableRowToSkuEntry(rows[index]),
-      ...coerced.entry,
+      ...(input as Record<string, unknown>),
     })
     if (!merged.ok) return { invalid: true as const }
     const duplicate = rows.some(
