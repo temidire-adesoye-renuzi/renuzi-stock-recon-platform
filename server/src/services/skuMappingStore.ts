@@ -122,7 +122,10 @@ export function saveSkuMapping(entries: SkuMappingEntry[], path: string = SKU_SE
   writeFileSync(path, stringifyCsv(rows), 'utf-8')
 }
 
-function coerceEntryInput(input: unknown): { ok: true; entry: SkuMappingEntry } | { ok: false } {
+/** Coerce arbitrary JSON input into a SkuMappingEntry (shared validation). */
+export function coerceSkuMappingInput(
+  input: unknown
+): { ok: true; entry: SkuMappingEntry } | { ok: false } {
   if (typeof input !== 'object' || input === null) return { ok: false }
   const body = input as Record<string, unknown>
   const asText = (value: unknown): string =>
@@ -172,7 +175,7 @@ export function listSkuMappings(path: string = SKU_SEED_PATH): SkuMappingEntry[]
 }
 
 export function createSkuMapping(input: unknown, path: string = SKU_SEED_PATH): SkuMappingOpResult {
-  const coerced = coerceEntryInput(input)
+  const coerced = coerceSkuMappingInput(input)
   if (!coerced.ok) return { ok: false, error: 'INVALID_SKU_MAPPING' }
   const entries = loadSkuMapping(path)
   if (entries.some((entry) => entry.leverEdgeSkuCode === coerced.entry.leverEdgeSkuCode)) {
@@ -191,7 +194,7 @@ export function updateSkuMapping(
   const entries = loadSkuMapping(path)
   const index = entries.findIndex((entry) => entry.leverEdgeSkuCode === code.trim())
   if (index < 0) return { ok: false, error: 'SKU_MAPPING_NOT_FOUND' }
-  const coerced = coerceEntryInput({ ...entries[index], ...(input as object) })
+  const coerced = coerceSkuMappingInput({ ...entries[index], ...(input as object) })
   if (!coerced.ok) return { ok: false, error: 'INVALID_SKU_MAPPING' }
   if (
     entries.some(

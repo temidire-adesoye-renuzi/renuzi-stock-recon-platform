@@ -3,7 +3,10 @@ import cors from 'cors'
 import { requireCutoffOpen } from './middleware/cutoff.js'
 import { requireAuth, requireRole } from './middleware/auth.js'
 import { adminRouter } from './routes/admin.js'
+import { auditRouter } from './routes/audit.js'
 import { authRouter } from './routes/auth.js'
+import { reconciliationRouter } from './routes/reconciliation.js'
+import { reportedGraphMode } from './services/storage/index.js'
 
 export function createApp(): express.Express {
   const app = express()
@@ -13,7 +16,11 @@ export function createApp(): express.Express {
   app.use(express.json())
 
   app.get('/api/v1/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'renuzi-stock-recon-api' })
+    res.json({
+      status: 'ok',
+      service: 'renuzi-stock-recon-api',
+      storageMode: reportedGraphMode(),
+    })
   })
 
   // Daily cutoff lock: every write endpoint (except login) is blocked once the
@@ -31,6 +38,9 @@ export function createApp(): express.Express {
   })
 
   app.use('/api/v1/auth', authRouter)
+  app.use('/api/v1/reconciliation', requireAuth, reconciliationRouter)
+  // Audit trail: executives read it too, so mount BEFORE the admin-only tree.
+  app.use('/api/v1/admin/audit', requireAuth, requireRole('executive', 'admin'), auditRouter)
   app.use('/api/v1/admin', requireAuth, requireRole('admin'), adminRouter)
 
   return app

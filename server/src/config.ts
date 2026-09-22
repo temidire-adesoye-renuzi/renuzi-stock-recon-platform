@@ -9,11 +9,22 @@ export const TIMEZONE = 'Africa/Lagos'
 /** Folder holding the sample daily exports and the SKU mapping seed. */
 export const SAMPLES_DIR = process.env.SAMPLES_DIR ?? join(REPO_ROOT, 'samples')
 
-/** CSV seed for SKU mapping (admin writes persist here until Phase 3). */
+/** CSV seed for SKU mapping (bulk-import source for the workbook SkuMap table). */
 export const SKU_SEED_PATH = process.env.SKU_SEED_PATH ?? join(SAMPLES_DIR, 'sku_seed.csv')
 
 /** Folder for generated artifacts (dry-run reports). */
 export const OUTPUT_DIR = process.env.OUTPUT_DIR ?? join(REPO_ROOT, 'output')
+
+/** Server data folder (users, mock master workbook). */
+export const DATA_DIR = process.env.DATA_DIR ?? join(REPO_ROOT, 'server', 'data')
+
+/**
+ * Path of the master workbook used by mock storage. Read per call so tests
+ * can point each file at its own temporary workbook via the environment.
+ */
+export function masterWorkbookPath(): string {
+  return process.env.MASTER_WORKBOOK_PATH ?? join(DATA_DIR, 'master_workbook.xlsx')
+}
 
 export const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-change-me'
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '12h'

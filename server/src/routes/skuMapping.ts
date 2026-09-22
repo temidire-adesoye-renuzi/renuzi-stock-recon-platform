@@ -1,24 +1,23 @@
-import { Router } from 'express'
+import { Router, type Response } from 'express'
+import multer from 'multer'
 import {
-  createSkuMapping,
-  deleteSkuMapping,
-  listSkuMappings,
-  updateSkuMapping,
+  createMapping,
+  deleteMapping,
+  importMappingsFromCsv,
+  listMappings,
+  updateMapping,
   type SkuMappingOpResult,
-} from '../services/skuMappingStore.js'
+} from '../services/skuMapService.js'
 
 /**
  * Admin SKU mapping API. Mounted under /api/v1/admin/sku-mapping behind
- * requireAuth + requireRole('admin'). Operates on the CSV seed and persists
- * back to disk (Phase 3 migrates this to the Excel SKUMapping sheet).
+ * requireAuth + requireRole('admin'). Since Phase 3 the source of truth is
+ * the SkuMap table in the master workbook; the Phase 2 CSV seed survives as
+ * a bulk-import source via POST /import.
  */
 export const skuMappingRouter = Router()
 
-function sendOpResult(
-  res: import('express').Response,
-  result: SkuMappingOpResult,
-  created = false
-): void {
+function sendOpResult(res: Response, result: SkuMappingOpResult, created = false): void {
   if (result.ok) {
     res.status(created ? 201 : 200).json({ mapping: result.entry })
     return
@@ -33,17 +32,36 @@ function sendOpResult(
 }
 
 skuMappingRouter.get('/', (_req, res): void => {
-  res.json({ mappings: listSkuMappings() })
+  listMappings()
+    .then((mappings) => res.json({ mappings }))
+    .catch((error: unknown) => {
+      res.status(500).json({ error: 'STORAGE_ERROR', message: (error as Error).message })
+    })
 })
 
 skuMappingRouter.post('/', (req, res): void => {
-  sendOpResult(res, createSkuMapping(req.body), true)
+  createMapping(req.body, req.user).then((result) => sendOpResult(res, result, true))
 })
 
 skuMappingRouter.put('/:code', (req, res): void => {
-  sendOpResult(res, updateSkuMapping(req.params.code, req.body))
+  updateMapping(req.params.code, req.body, req.user).then((result) => sendOpResult(res, result))
 })
 
 skuMappingRouter.delete('/:code', (req, res): void => {
-  sendOpResult(res, deleteSkuMapping(req.params.code))
+  deleteMapping(req.params.code, req.user).then((result) => sendOpResult(res, result))
+})
+
+const uploadCsv = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } })
+
+/** Bulk import of SKU mappings from a CSV upload (Phase 2 seed format). */
+skuMappingRouter.post('/import', uploadCsv.single('file'), (req, res): void => {
+  if (!req.file) {
+    res.status(400).json({ error: 'CSV_FILE_REQUIRED', field: 'file' })
+    return
+  }
+  importMappingsFromCsv(req.file.buffer.toString('utf-8'), req.user)
+    .then((result) => res.status(200).json(result))
+    .catch((error: unknown) => {
+      res.status(400).json({ error: 'IMPORT_FAILED', message: (error as Error).message })
+    })
 })

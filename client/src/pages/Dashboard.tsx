@@ -19,7 +19,7 @@ export default function Dashboard() {
     api
       .get('/auth/me')
       .then(({ data }) => setUser(data.user))
-      .catch(() => setError('Could not load your profile.'))
+      .catch(() => setError('Sorry, could not load your profile.'))
   }, [])
 
   function handleLogout() {

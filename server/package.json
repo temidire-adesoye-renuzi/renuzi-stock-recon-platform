@@ -8,6 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "seed": "tsx src/scripts/seed.ts",
     "recon:dry": "tsx src/scripts/reconDryRun.ts",
+    "graph:check": "tsx src/scripts/graph-check.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "tsc",
@@ -17,11 +18,15 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@azure/msal-node": "^6.0.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -29,6 +34,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.20.4",
     "@types/supertest": "^7.2.1",
     "eslint": "^9.9.0",

@@ -119,3 +119,171 @@ export const DEFAULT_DZ_FACTOR = 12
 
 /** Pairwise quantity tolerance for the "Matched" status. */
 export const QTY_TOLERANCE = 0.001
+
+/**
+ * Master workbook layout (Phase 3). One sheet + one real Excel table per
+ * concern; Power BI reads these tables directly.
+ */
+export interface WorkbookSheetSpec {
+  sheet: string
+  table: string
+  columns: readonly string[]
+}
+
+export const RECONCILIATION_SHEET = 'Reconciliation'
+export const RECONCILIATION_TABLE = 'ReconTable'
+export const SKUMAP_SHEET = 'SkuMap'
+export const SKUMAP_TABLE = 'SkuMap'
+export const AUDITLOG_SHEET = 'AuditLog'
+export const AUDITLOG_TABLE = 'AuditLog'
+
+/** Column order of the SkuMap sheet (mirrors the CSV seed headers). */
+export const SKUMAP_COLUMNS = SKU_MAPPING_CSV_COLUMNS
+
+/** Column order of the AuditLog sheet. */
+export const AUDITLOG_COLUMNS = [
+  'Timestamp',
+  'Actor_ID',
+  'Actor_Email',
+  'Action',
+  'Date',
+  'Location',
+  'Details',
+] as const
+
+export type AuditAction =
+  | 'SUBMIT_RECONCILIATION'
+  | 'MIGRATE_SKU_SEED'
+  | 'IMPORT_SKU_MAPPING'
+  | 'SKU_MAPPING_CHANGE'
+  | 'GRAPH_CHECK'
+
+export interface AuditLogEntry {
+  Timestamp: string
+  Actor_ID: string
+  Actor_Email: string
+  Action: AuditAction | string
+  Date: string | null
+  Location: string | null
+  Details: string
+}
+
+export const WORKBOOK_SHEETS: readonly WorkbookSheetSpec[] = [
+  {
+    sheet: RECONCILIATION_SHEET,
+    table: RECONCILIATION_TABLE,
+    columns: RECONCILIATION_COLUMNS,
+  },
+  { sheet: SKUMAP_SHEET, table: SKUMAP_TABLE, columns: SKUMAP_COLUMNS },
+  { sheet: AUDITLOG_SHEET, table: AUDITLOG_TABLE, columns: AUDITLOG_COLUMNS },
+]
+
+/** Values a storage layer may persist into a workbook cell. */
+export type WorkbookCellValue = string | number | boolean | null
+
+/** A table row read back from storage, keyed by column name. */
+export type WorkbookTableRow = Record<string, WorkbookCellValue>
+
+export function sheetSpec(sheet: string): WorkbookSheetSpec {
+  const spec = WORKBOOK_SHEETS.find((candidate) => candidate.sheet === sheet)
+  if (!spec) throw new Error(`Unknown workbook sheet "${sheet}"`)
+  return spec
+}
+
+export function reconRowToCells(row: ReconciliationRow): WorkbookCellValue[] {
+  return RECONCILIATION_COLUMNS.map((column) => row[column] as WorkbookCellValue)
+}
+
+export function skuEntryToCells(entry: SkuMappingEntry): WorkbookCellValue[] {
+  return [
+    entry.leverEdgeSkuCode,
+    entry.leverEdgeItemName,
+    entry.xeroItemCode,
+    entry.xeroItemName,
+    entry.csFactor,
+    entry.dzFactor,
+    entry.category,
+    entry.active,
+  ]
+}
+
+export function auditEntryToCells(entry: AuditLogEntry): WorkbookCellValue[] {
+  return [
+    entry.Timestamp,
+    entry.Actor_ID,
+    entry.Actor_Email,
+    entry.Action,
+    entry.Date,
+    entry.Location,
+    entry.Details,
+  ]
+}
+
+/** Coerce a table cell back to a number (null when blank/invalid). */
+export function cellToNumber(value: WorkbookCellValue | undefined): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value.trim())
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
+/** Coerce a table cell back to trimmed text (null when blank). */
+export function cellToText(value: WorkbookCellValue | undefined): string | null {
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed === '' ? null : trimmed
+  }
+  if (typeof value === 'number') return String(value)
+  if (typeof value === 'boolean') return String(value)
+  return null
+}
+
+export function cellToBoolean(value: WorkbookCellValue | undefined): boolean {
+  return value === true || value === 'true' || value === 'TRUE'
+}
+
+/** Map a storage table row back onto the typed ReconciliationRow shape. */
+export function tableRowToReconRow(row: WorkbookTableRow): ReconciliationRow {
+  const numberOrNull = (key: string) => cellToNumber(row[key])
+  return {
+    Date: cellToText(row.Date) ?? '',
+    Location: cellToText(row.Location) ?? '',
+    SKU_Code: cellToText(row.SKU_Code) ?? '',
+    Item_Name: cellToText(row.Item_Name) ?? '',
+    LeverEdge_Qty: numberOrNull('LeverEdge_Qty'),
+    Xero_Qty: numberOrNull('Xero_Qty'),
+    Physical_CS: numberOrNull('Physical_CS'),
+    Physical_DZ: numberOrNull('Physical_DZ'),
+    Physical_PC: numberOrNull('Physical_PC'),
+    Physical_Units: numberOrNull('Physical_Units'),
+    Docked_Qty: numberOrNull('Docked_Qty'),
+    Undocked_Qty: numberOrNull('Undocked_Qty'),
+    Total_Variance: numberOrNull('Total_Variance'),
+    Unit_Price_NGN: numberOrNull('Unit_Price_NGN'),
+    Variance_Value_NGN: numberOrNull('Variance_Value_NGN'),
+    Shortage_Qty: numberOrNull('Shortage_Qty'),
+    Surplus_Qty: numberOrNull('Surplus_Qty'),
+    Sellable_Forward_Qty: numberOrNull('Sellable_Forward_Qty'),
+    Status: (cellToText(row.Status) ?? 'Unmapped') as ReconciliationStatus,
+    Needs_Review: cellToBoolean(row.Needs_Review),
+    Manager_ID: cellToText(row.Manager_ID),
+    Submitted_At: cellToText(row.Submitted_At),
+    Notes: cellToText(row.Notes) ?? '',
+  }
+}
+
+/** Map a storage table row back onto the typed SkuMappingEntry shape. */
+export function tableRowToSkuEntry(row: WorkbookTableRow): SkuMappingEntry {
+  return {
+    leverEdgeSkuCode: cellToText(row.LeverEdge_SKU_Code) ?? '',
+    leverEdgeItemName: cellToText(row.LeverEdge_Item_Name) ?? '',
+    xeroItemCode: cellToText(row.Xero_Item_Code) ?? '',
+    xeroItemName: cellToText(row.Xero_Item_Name) ?? '',
+    csFactor: cellToNumber(row.CS_Factor) ?? DEFAULT_CS_FACTOR,
+    dzFactor: cellToNumber(row.DZ_Factor) ?? DEFAULT_DZ_FACTOR,
+    category: cellToText(row.Category) ?? '',
+    active: cellToBoolean(row.Active),
+  }
+}
