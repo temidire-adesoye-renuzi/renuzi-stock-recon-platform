@@ -5,7 +5,6 @@ import {
   HTTPMessageHandler,
 } from '@microsoft/microsoft-graph-client'
 import {
-  AUDITLOG_SHEET,
   WORKBOOK_SHEETS,
   auditEntryToCells,
   sheetSpec,
@@ -172,7 +171,7 @@ export class GraphStorage implements IStorage {
     skipSession = false
   ): Promise<T> {
     const attempt = async (): Promise<T> => {
-      let headers: Record<string, string> = {}
+      const headers: Record<string, string> = {}
       if (!skipSession) headers['workbook-session-id'] = await this.ensureSession()
       let api = this.client.api(`${this.base()}${path}`)
       if (Object.keys(headers).length > 0) {

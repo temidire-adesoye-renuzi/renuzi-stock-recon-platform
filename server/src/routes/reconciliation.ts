@@ -7,7 +7,6 @@ import { parsePhysical } from '../services/parsers/physical.js'
 import { reconcile, summarizeRows } from '../services/reconciliation.js'
 import { listMappings } from '../services/skuMapService.js'
 import {
-  AUDITLOG_SHEET,
   RECONCILIATION_SHEET,
   reconRowToCells,
   tableRowToReconRow,

@@ -27,6 +27,9 @@ let managerToken: string
 beforeAll(async () => {
   writeFileSync(seedPath, SEED_CSV, 'utf-8')
   process.env.SKU_SEED_PATH = seedPath
+  // Phase 3: the API is backed by the workbook — isolate it to a temp file so
+  // tests never touch the real server/data/master_workbook.xlsx.
+  process.env.MASTER_WORKBOOK_PATH = join(tempDir, 'master_workbook.xlsx')
   process.env.CUTOFF_HOUR = '24' // never locked — route tests must be time-independent
   store = await import('../services/skuMappingStore.js')
   const { createApp } = await import('../app.js')
@@ -163,7 +166,7 @@ describe('admin SKU mapping API', () => {
     expect(invalid.status).toBe(400)
   })
 
-  it('PUT updates and DELETE removes, persisting to the CSV seed', async () => {
+  it('PUT updates and DELETE removes, persisting to the SkuMap table', async () => {
     const updated = await request(app)
       .put('/api/v1/admin/sku-mapping/L9')
       .set('Authorization', `Bearer ${adminToken}`)

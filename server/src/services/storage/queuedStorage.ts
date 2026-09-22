@@ -47,10 +47,12 @@ export class QueuedStorage implements IStorage {
 
   /**
    * Run a multi-step storage transaction (e.g. delete + append + audit) as a
-   * single step in the global write queue.
+   * single step in the global write queue. Nested writes made through THIS
+   * wrapper inside the transaction execute inline (re-entrant) instead of
+   * deadlocking behind the transaction itself.
    */
   runExclusive<T>(operation: () => Promise<T>): Promise<T> {
-    return this.queue.enqueue(operation)
+    return this.queue.runExclusive(operation)
   }
 
   private run<T>(operation: () => Promise<T>): Promise<T> {
