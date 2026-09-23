@@ -9,3 +9,5 @@ FORMULAS: Docked = LeverEdge − Physical_Units; Undocked = Physical_Units − X
 ROLES: warehouse_manager (own location only, edit until 18:00 WAT), executive (read-all + flag), admin (full).
 DESIGN: dark default #0F172A, slate surfaces, accent #00B5D8, Lucide icons, minimalist.
 WORKBOOK SHEETS: Reconciliation, SKUMapping, AuditLog (schemas defined in server code Phase 3).
+## SKU MASTER (architecture decision — permanent)
+One canonical SKU master sheet: samples/sku_master_real.xlsx (headers: DESCRIPTION | SKU CODE | SUPPLIER | BRAND + unnamed empty cols). SKU CODE is UNIVERSAL (same code in Xero, LeverEdge, physical). The sheet is a living document, re-imported over time. The Admin UI edits the LIVE SkuMap table in the master workbook, never the source file. GOVERNANCE: on re-import, sheet wins identity fields (codes/names/category); manually corrected factors are preserved when sheet has no factor column; sheet presence governs Active status (absent → deactivated). Permanent retirement = remove from sheet + re-import; temporary block = UI toggle. Never hard-delete SkuMap rows — historical Reconciliation rows depend on them. Audit everything.
