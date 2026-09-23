@@ -5,9 +5,6 @@ import {
   PlusIcon,
   SearchIcon,
   Trash2Icon,
-  PlusIcon,
-  SearchIcon,
-  Trash2Icon,
   UploadIcon,
   XIcon,
 } from 'lucide-react'
@@ -92,7 +89,6 @@ export default function AdminPage() {
         .toLowerCase()
         .includes(term),
     )
-    )
   }, [mappings, query])
 
   // ----- inline editing -----------------------------------------------------
@@ -129,7 +125,6 @@ export default function AdminPage() {
           row.leverEdgeSkuCode === updated.leverEdgeSkuCode ? updated : row,
         ),
       )
-      )
       toast(`Mapping ${editing.code} updated`, 'success')
     } catch (error) {
       toast(errorMessage(error), 'error')
@@ -150,7 +145,6 @@ export default function AdminPage() {
           row.leverEdgeSkuCode === updated.leverEdgeSkuCode ? updated : row,
         ),
       )
-      )
     } catch (error) {
       toast(errorMessage(error), 'error')
     } finally {
@@ -169,7 +163,6 @@ export default function AdminPage() {
       await api.deleteMapping(entry.leverEdgeSkuCode)
       setMappings((current) =>
         (current ?? []).filter((row) => row.leverEdgeSkuCode !== entry.leverEdgeSkuCode),
-      )
       )
       toast(`Mapping ${entry.leverEdgeSkuCode} deleted`, 'success')
     } catch (error) {
@@ -246,11 +239,7 @@ export default function AdminPage() {
       setCreateError(
         error instanceof ApiError && error.code === 'SKU_MAPPING_EXISTS'
           ? 'A mapping with that LeverEdge code already exists.'
-      setCreateError(
-        error instanceof ApiError && error.code === 'SKU_MAPPING_EXISTS'
-          ? 'A mapping with that LeverEdge code already exists.'
           : errorMessage(error),
-      )
       )
     }
   }
@@ -262,11 +251,7 @@ export default function AdminPage() {
       toast(
         `CSV import: ${result.created} created, ${result.updated} updated (${result.total} total)` +
           (result.errors.length > 0 ? ` · ${result.errors.length} rows skipped` : ''),
-      toast(
-        `CSV import: ${result.created} created, ${result.updated} updated (${result.total} total)` +
-          (result.errors.length > 0 ? ` · ${result.errors.length} rows skipped` : ''),
         result.errors.length > 0 ? 'info' : 'success',
-      )
       )
       const list = await api.listMappings()
       setMappings(list)

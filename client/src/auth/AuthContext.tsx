@@ -55,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({ user, mockMode, api, login, loginAs, logout, can }),
     [user, mockMode, api, login, loginAs, logout, can],
   )
-  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

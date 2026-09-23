@@ -131,7 +131,6 @@ export const liveApi: RenuziApi = {
         `/admin/sku-mapping/${encodeURIComponent(code)}`,
         patch,
       )
-      )
       return data.mapping
     }),
 
@@ -139,7 +138,6 @@ export const liveApi: RenuziApi = {
     guarded(async () => {
       const { data } = await http.delete<{ mapping: SkuMappingEntry }>(
         `/admin/sku-mapping/${encodeURIComponent(code)}`,
-      )
       )
       return data.mapping
     }),

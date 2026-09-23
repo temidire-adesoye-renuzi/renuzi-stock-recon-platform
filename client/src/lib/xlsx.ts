@@ -187,11 +187,7 @@ function validateHeader(
 function validateRows<T>(
   fileLabel: string,
   schema: z.ZodType<T>,
-function validateRows<T>(
-  fileLabel: string,
-  schema: z.ZodType<T>,
   rows: T[],
-): { ok: boolean; issues: string[] } {
 ): { ok: boolean; issues: string[] } {
   const issues: string[] = []
   for (let i = 0; i < rows.length; i += 1) {
@@ -305,7 +301,6 @@ export function dateFromSheetName(sheetName: string): string | null {
 
 export async function parseXeroFile(
   file: File,
-): Promise<ParsedFile<XeroItemRow> & { sheetNames: string[] }> {
 ): Promise<ParsedFile<XeroItemRow> & { sheetNames: string[] }> {
   const sheets = await readWorkbookRows(file)
   if (sheets.size === 0) {

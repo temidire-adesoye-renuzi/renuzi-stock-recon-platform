@@ -237,13 +237,7 @@ export function reconcile(input: ReconcileInput): ReconciliationRow[] {
   rows.sort(
     (a, b) =>
       (a.Item_Name < b.Item_Name ? -1 : a.Item_Name > b.Item_Name ? 1 : 0) ||
-  rows.sort(
-    (a, b) =>
-      (a.Item_Name < b.Item_Name ? -1 : a.Item_Name > b.Item_Name ? 1 : 0) ||
       (a.SKU_Code < b.SKU_Code ? -1 : a.SKU_Code > b.SKU_Code ? 1 : 0),
-  )
-  return rows
-}
   )
   return rows
 }
@@ -260,7 +254,6 @@ function buildRow(group: Group, input: ReconcileInput): ReconciliationRow {
         (group.physical.cs ?? 0) * csFactor +
           (group.physical.dz ?? 0) * dzFactor +
           group.physical.pc,
-        )
       )
     : null
 
@@ -347,7 +340,6 @@ export function mergeManualCounts(
   manual: ManualCountRow[],
   location: string,
 ): { merged: PhysicalItemRow[]; notesBySku: Map<string, string> } {
-): { merged: PhysicalItemRow[]; notesBySku: Map<string, string> } {
   const notesBySku = new Map<string, string>()
   const merged = physical.map((row) => ({ ...row }))
   const bySku = new Map(merged.map((row) => [row.sku, row]))
@@ -409,7 +401,6 @@ export function summarizeRows(rows: ReconciliationRow[]): ReconSummary {
         summary.undockedValueNGN = round3(
           summary.undockedValueNGN + row.Undocked_Qty * row.Unit_Price_NGN,
         )
-        )
       }
     }
     if (row.Variance_Value_NGN !== null) {
@@ -455,7 +446,6 @@ export interface ComputedPreviewRow extends PreviewRow {
 export function buildPreviewRows(
   sources: { leveredge: LeverEdgeItemRow[]; xero: XeroItemRow[]; physical: PhysicalItemRow[] },
   mapping: SkuMappingEntry[],
-): PreviewRow[] {
 ): PreviewRow[] {
   const rows = reconcile({
     date: 'preview',

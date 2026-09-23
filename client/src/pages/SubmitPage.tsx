@@ -150,7 +150,6 @@ export default function SubmitPage() {
         { leveredge: parsed.leveredge, xero: xeroForLocation, physical: parsed.physical },
         map,
       )
-      )
       // Restore any locally saved draft counts/notes for this date+location.
       try {
         const raw = localStorage.getItem(draftKey(today, loc))

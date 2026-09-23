@@ -82,7 +82,6 @@ export default function DashboardPage() {
             dates.map((date) => api.getReconciliationStatus(date, loc).catch(() => null)),
           ),
         )
-        )
         setLocations(safeLocs)
         setStatuses(results.filter((item): item is StatusResult => item !== null))
       })
@@ -128,7 +127,6 @@ export default function DashboardPage() {
       }),
     [allRows, scopedDates, location, category, categoryBySku],
   )
-  )
 
   const previousRows = useMemo(() => {
     const days = Number(range)
@@ -149,7 +147,6 @@ export default function DashboardPage() {
         ? row.Docked_Qty * row.Unit_Price_NGN
         : 0,
     )
-    )
     const prevDockedValue = sum(previousRows, (row) =>
       row.Docked_Qty !== null && row.Unit_Price_NGN !== null && row.Docked_Qty > 0
         ? row.Docked_Qty * row.Unit_Price_NGN
@@ -160,7 +157,6 @@ export default function DashboardPage() {
     )
     const prevUndocked = sum(previousRows, (row) =>
       row.Undocked_Qty !== null && row.Undocked_Qty > 0 ? row.Undocked_Qty : 0,
-    )
     )
     const discrepancies = filtered.filter((row) => row.Status !== 'Matched').length
     const prevDiscrepancies = previousRows.filter((row) => row.Status !== 'Matched').length
@@ -207,7 +203,6 @@ export default function DashboardPage() {
               ? row.Docked_Qty * row.Unit_Price_NGN
               : 0),
           0,
-        )
         ),
     }))
   }, [dates, filtered])
