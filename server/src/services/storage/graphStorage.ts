@@ -10,6 +10,7 @@ import {
   sheetSpec,
   type AuditLogEntry,
   type WorkbookCellValue,
+  type WorkbookSheetSpec,
   type WorkbookTableRow,
 } from '../schema.js'
 import { withRetry } from './writeQueue.js'
@@ -77,6 +78,13 @@ interface RangeResponse {
 interface TableRowEntity {
   index: number
   values: unknown[]
+}
+
+/** Graph Range resource (subset) — response of the table `range` action. */
+interface TableRangeResponse {
+  address?: string
+  rowCount?: number
+  columnCount?: number
 }
 
 function isSessionError(error: unknown): boolean {
@@ -214,6 +222,8 @@ export class GraphStorage implements IStorage {
 
       const lastCol = columnLetter(spec.columns.length)
       // Write the header row (idempotent), then create the table if missing.
+      // The PATCH also EXTENDS the header of a pre-existing narrower sheet —
+      // new columns are appended at the end and data rows are untouched.
       await this.request('PATCH', `/worksheets/${spec.sheet}/range(address='A1:${lastCol}1')`, {
         values: [spec.columns],
       })
@@ -230,8 +240,29 @@ export class GraphStorage implements IStorage {
       } catch (error) {
         if (!errorStatusIs(error, [400, 409])) throw error
         // Table already exists — expected on every run after the first.
+        await this.recreateNarrowTable(spec)
       }
     }
+  }
+
+  /**
+   * Schema migration for pre-existing tables: an Excel table is range
+   * metadata, so when it spans FEWER columns than the spec (e.g. SkuMap
+   * before the UOM extension) delete it and re-POST it over the full
+   * extended range (header row + every data row). Cell data is untouched.
+   */
+  private async recreateNarrowTable(spec: WorkbookSheetSpec): Promise<void> {
+    const range = await this.request<TableRangeResponse>('POST', `/tables/${spec.table}/range`)
+    const columnCount = range?.columnCount
+    const rowCount = range?.rowCount
+    if (typeof columnCount !== 'number' || columnCount >= spec.columns.length) return
+    const lastCol = columnLetter(spec.columns.length)
+    await this.request('DELETE', `/tables/${spec.table}`)
+    await this.request('POST', '/tables', {
+      name: spec.table,
+      address: `${spec.sheet}!A1:${lastCol}${Math.max(typeof rowCount === 'number' ? rowCount : 1, 1)}`,
+      hasHeaders: true,
+    })
   }
 
   async appendRows(sheet: string, rows: WorkbookCellValue[][]): Promise<void> {
