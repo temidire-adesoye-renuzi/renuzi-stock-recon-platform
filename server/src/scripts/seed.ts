@@ -22,12 +22,19 @@ const SEED_USERS: Array<Omit<StoredUser, 'passwordHash'>> = [
     role: 'warehouse_manager',
     location: 'Lekki',
   },
+  {
+    id: 'usr_super',
+    email: 'temidire@renuzi',
+    name: 'Temidire Super Admin',
+    role: 'super_admin',
+  },
 ]
 
 const PASSWORDS: Record<string, string> = {
   usr_admin: 'Admin@2026',
   usr_ketu: 'Ketu@2026',
   usr_lekki: 'Lekki@2026',
+  usr_super: 'Super@2026',
 }
 
 interface UserFile {

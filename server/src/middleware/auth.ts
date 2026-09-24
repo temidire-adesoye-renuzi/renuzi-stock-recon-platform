@@ -24,7 +24,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return
   }
   const stored = typeof payload.sub === 'string' ? findById(payload.sub) : undefined
-  if (!stored) {
+  if (!stored || stored.deactivated) {
     res.status(401).json({ error: 'UNAUTHORIZED' })
     return
   }
@@ -32,10 +32,13 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   next()
 }
 
-/** Restrict a route to the given roles. Must run after requireAuth. */
+/**
+ * Restrict a route to the given roles. Must run after requireAuth.
+ * A super_admin passes EVERY role guard, whatever the list contains.
+ */
 export function requireRole(...roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || (req.user.role !== 'super_admin' && !roles.includes(req.user.role))) {
       res.status(403).json({ error: 'FORBIDDEN' })
       return
     }

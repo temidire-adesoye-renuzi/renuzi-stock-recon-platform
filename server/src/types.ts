@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'executive' | 'warehouse_manager'
+export type Role = 'super_admin' | 'admin' | 'executive' | 'warehouse_manager'
 
 export interface StoredUser {
   id: string
@@ -7,6 +7,7 @@ export interface StoredUser {
   role: Role
   location?: string
   passwordHash: string
+  deactivated?: boolean
 }
 
 export interface AuthUser {

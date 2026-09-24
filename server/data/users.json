@@ -22,6 +22,13 @@
       "role": "warehouse_manager",
       "location": "Lekki",
       "passwordHash": "$2b$10$.TeN6hE1HsReX9KaLh/MT.DcaCQm6WJ7CXrEP2eKTgtB2vsvFv.Te"
+    },
+    {
+      "id": "usr_super",
+      "email": "temidire@renuzi",
+      "name": "Temidire Super Admin",
+      "role": "super_admin",
+      "passwordHash": "$2b$10$QgzkD8m0TKN5oRdcSKBUGeykXbc4AafXDLKAmOOar6ckIzzOLujI2"
     }
   ]
 }
