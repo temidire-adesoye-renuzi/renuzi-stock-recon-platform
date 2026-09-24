@@ -19,7 +19,7 @@ authRouter.post('/login', (req, res): void => {
 
   const user = findByEmail(email)
   const valid = user ? bcrypt.compareSync(password, user.passwordHash) : false
-  if (!user || !valid) {
+  if (!user || user.deactivated || !valid) {
     res.status(401).json({ error: 'INVALID_CREDENTIALS' })
     return
   }

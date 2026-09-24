@@ -3,6 +3,7 @@ import cors from 'cors'
 import { requireCutoffOpen } from './middleware/cutoff.js'
 import { requireAuth, requireRole } from './middleware/auth.js'
 import { adminRouter } from './routes/admin.js'
+import { adminUsersRouter } from './routes/adminUsers.js'
 import { auditRouter } from './routes/audit.js'
 import { authRouter } from './routes/auth.js'
 import { reconciliationRouter } from './routes/reconciliation.js'
@@ -41,6 +42,14 @@ export function createApp(): express.Express {
   app.use('/api/v1/reconciliation', requireAuth, reconciliationRouter)
   // Audit trail: executives read it too, so mount BEFORE the admin-only tree.
   app.use('/api/v1/admin/audit', requireAuth, requireRole('executive', 'admin'), auditRouter)
+  // User management (list/create/deactivate): super_admin ONLY — plain admins
+  // lose access by design, so mount BEFORE the admin tree.
+  app.use(
+    '/api/v1/admin/users',
+    requireAuth,
+    requireRole('super_admin'),
+    adminUsersRouter
+  )
   app.use('/api/v1/admin', requireAuth, requireRole('admin'), adminRouter)
 
   return app

@@ -111,6 +111,9 @@ export interface SkuMappingEntry {
   dzFactor: number
   category: string
   active: boolean
+  uom?: string | null
+  uomQty?: number | null
+  uomBasis?: string | null
 }
 
 /** Conversion factor defaults when no mapping entry provides factors. */
@@ -137,8 +140,18 @@ export const SKUMAP_TABLE = 'SkuMap'
 export const AUDITLOG_SHEET = 'AuditLog'
 export const AUDITLOG_TABLE = 'AuditLog'
 
-/** Column order of the SkuMap sheet (mirrors the CSV seed headers). */
-export const SKUMAP_COLUMNS = SKU_MAPPING_CSV_COLUMNS
+/**
+ * Column order of the SkuMap sheet: the CSV seed headers plus the UOM
+ * extension appended at the END (column order matters — old workbooks are
+ * migrated in place). The CSV seed itself stays 8 columns; its rows simply
+ * read back with null UOM fields.
+ */
+export const SKUMAP_COLUMNS = [
+  ...SKU_MAPPING_CSV_COLUMNS,
+  'UOM',
+  'UOM_Qty',
+  'UOM_Basis',
+] as const
 
 /** Column order of the AuditLog sheet. */
 export const AUDITLOG_COLUMNS = [
@@ -204,6 +217,9 @@ export function skuEntryToCells(entry: SkuMappingEntry): WorkbookCellValue[] {
     entry.dzFactor,
     entry.category,
     entry.active,
+    entry.uom ?? null,
+    entry.uomQty ?? null,
+    entry.uomBasis ?? null,
   ]
 }
 
@@ -285,5 +301,8 @@ export function tableRowToSkuEntry(row: WorkbookTableRow): SkuMappingEntry {
     dzFactor: cellToNumber(row.DZ_Factor) ?? DEFAULT_DZ_FACTOR,
     category: cellToText(row.Category) ?? '',
     active: cellToBoolean(row.Active),
+    uom: cellToText(row.UOM),
+    uomQty: cellToNumber(row.UOM_Qty),
+    uomBasis: cellToText(row.UOM_Basis),
   }
 }

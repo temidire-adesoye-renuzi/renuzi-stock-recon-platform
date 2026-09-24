@@ -72,6 +72,54 @@ function dataRowCount(ws: Worksheet): number {
   return count
 }
 
+/** Header row of a worksheet as trimmed names (index 0 = column 1). */
+function headerNames(ws: Worksheet): string[] {
+  const values = ws.getSheetValues()
+  const headerRow = values?.[1]
+  if (!headerRow) return []
+  const cells = Array.isArray(headerRow) ? headerRow : Object.values(headerRow)
+  const names: string[] = []
+  for (let c = 1; c < cells.length; c++) {
+    const cell = cellFromSheet(cells[c])
+    names.push(cell === null ? '' : String(cell).trim())
+  }
+  return names
+}
+
+/** True when the sheet's header row matches the spec column-for-column. */
+function headersMatchSpec(ws: Worksheet, spec: WorkbookSheetSpec): boolean {
+  const names = headerNames(ws)
+  return spec.columns.every((column, index) => names[index] === column)
+}
+
+/**
+ * Data rows keyed by the sheet's OWN header names (the header row as written,
+ * not the current spec). The migration source of truth: values survive by
+ * column NAME even when the sheet predates a schema extension.
+ */
+function readRowsByOwnHeaders(ws: Worksheet): WorkbookTableRow[] {
+  const headers = headerNames(ws)
+  const width = headers.length
+  if (width === 0) return []
+  const values = ws.getSheetValues()
+  const rows: WorkbookTableRow[] = []
+  for (let i = 2; i < values.length; i++) {
+    const raw = values[i]
+    if (raw === undefined) break
+    const record: WorkbookTableRow = {}
+    let empty = true
+    for (let c = 1; c <= width; c++) {
+      const value = cellFromSheet((raw as Record<number, unknown>)[c])
+      if (value !== null) empty = false
+      const name = headers[c - 1]
+      if (name !== '') record[name] = value
+    }
+    if (empty) break
+    rows.push(record)
+  }
+  return rows
+}
+
 export class MockStorage implements IStorage {
   readonly mode = 'mock' as const
   private ensured = false
@@ -162,10 +210,18 @@ export class MockStorage implements IStorage {
     let changed = !existsSync(this.filePath)
     for (const spec of WORKBOOK_SHEETS) {
       const ws = wb.getWorksheet(spec.sheet)
-      const tableMissing = !ws || !tableNames(ws).includes(spec.table)
-      if (tableMissing) {
+      if (!ws || !tableNames(ws).includes(spec.table)) {
         // Preserve any existing data (e.g. sheet created outside a table).
         const existingRows = ws ? this.readCells(ws, spec) : []
+        this.rebuildSheet(wb, spec, existingRows)
+        changed = true
+      } else if (!headersMatchSpec(ws, spec)) {
+        // Schema migration: the table predates a column extension. Rebuild
+        // the sheet from its own records under the new spec — every value
+        // keeps its column, fields the old sheet never had become null.
+        const existingRows = readRowsByOwnHeaders(ws).map((record) =>
+          spec.columns.map((column) => record[column] ?? null)
+        )
         this.rebuildSheet(wb, spec, existingRows)
         changed = true
       }

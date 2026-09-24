@@ -79,13 +79,12 @@ describe('GET /api/v1/auth/me', () => {
 })
 
 describe('RBAC over HTTP', () => {
-  it('lets an admin list users via /api/v1/admin/users', async () => {
+  it('blocks a plain admin from /api/v1/admin/users (super_admin only)', async () => {
     const res = await request(app)
       .get('/api/v1/admin/users')
       .set('Authorization', `Bearer ${tokens['admin@renuzi']}`)
-    expect(res.status).toBe(200)
-    expect(res.body.users).toHaveLength(3)
-    expect(res.body.users.every((user: { passwordHash?: string }) => !user.passwordHash)).toBe(true)
+    expect(res.status).toBe(403)
+    expect(res.body).toEqual({ error: 'FORBIDDEN' })
   })
 
   it('blocks a warehouse_manager token from admin routes', async () => {
